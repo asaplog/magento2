@@ -39,7 +39,7 @@ php bin/magento cache:clean
 No terminal, vá até a pasta de seu Magento e execute:
 
 ```
-composer install asaplog/cotacao
+composer require "asaplog/cotacao @dev"
 ```
 
 ## Configuração
