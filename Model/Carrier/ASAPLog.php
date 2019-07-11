@@ -10,12 +10,14 @@ use Magento\Shipping\Model\Carrier\AbstractCarrier;
 use Magento\Shipping\Model\Carrier\CarrierInterface;
 use Magento\Shipping\Model\Rate\ResultFactory;
 use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
 class ASAPLog extends AbstractCarrier implements CarrierInterface
 {
     protected $_code = 'asaplog';
     protected $_name = 'ASAP Log';
+    protected $_storeManager;
     protected $_scopeConfig;
     protected $_rateResultFactory;
     protected $_rateMethodFactory;
@@ -26,8 +28,9 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
     protected $_valor;
     protected $_cotacao;
 
-    public function __construct(ScopeConfigInterface $scopeConfig, ErrorFactory $rateErrorFactory, LoggerInterface $logger, ResultFactory $rateResultFactory, MethodFactory $rateMethodFactory, array $data = [])
+    public function __construct(StoreManagerInterface $storeManager, ScopeConfigInterface $scopeConfig, ErrorFactory $rateErrorFactory, LoggerInterface $logger, ResultFactory $rateResultFactory, MethodFactory $rateMethodFactory, array $data = [])
     {
+        $this->_storeManager = $storeManager;
         $this->_scopeConfig = $scopeConfig;
         $this->_rateResultFactory = $rateResultFactory;
         $this->_rateMethodFactory = $rateMethodFactory;
@@ -57,6 +60,8 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
 
         if ($this->_chave == null || $this->_chave == '') {
             $this->logMessage("Chave não cadastrada");
+
+            informarCotacaoInvalida();
             return false;
         }
 
@@ -125,6 +130,27 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
             return json_decode($result, true);
         } catch (\Exception $exception) {
             $this->logMessage('Erro ao fazer cotação: ' . $exception->getMessage());
+            return null;
+        }
+    }
+
+    public function informarCotacaoInvalida()
+    {
+        try {
+            $ch = curl_init();
+
+            curl_setopt($ch, CURLOPT_URL, 'https://app.asaplog.com.br/webservices/v1/informarCotacaoInvalida?plataforma=MAGENTO&nome=' . $this->_storeManager->getStore()->getName() . '&url=' . $this->_storeManager->getStore()->getBaseUrl());
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_POST, 1);
+
+            $result = curl_exec($ch);
+            if (curl_errno($ch)) {
+                return false;
+            }
+            curl_close($ch);
+
+            return true;
+        } catch (\Exception $exception) {
             return null;
         }
     }
