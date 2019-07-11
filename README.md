@@ -1,6 +1,6 @@
 # Extensão ASAP Log para Magento 2
 
-Com a integração de cotação de frete da ASAP Log para Magento 2, você poderá oferecer o frete nativamente dentro de sua loja.
+Com a integração de cotação de frete da ASAP Log para Magento 2, você poderá oferecer o frete de forma nativa em sua loja. Basta instalar e configurar sua chave de integração.
 
 **Importante:** Caso o CEP do destinatário não seja atendido, o peso total da cotação exceda 30kg ou o valor da cotação exceda o de sua negociação, a cotação não será feita.
 
@@ -14,26 +14,6 @@ Na pasta do Magento, abra as pastas ```app/code/```. Crie então uma pasta chama
 
 Extraia o arquivo ZIP dentro dessa pasta.
 
-No terminal, vá até a pasta do Magento e execute:
-
-```
-php bin/magento setup:upgrade
-```
-
-Caso seu Magento seja compilado, também execute:
-
-```
-php bin/magento setup:di:compile
-```
-
-Para limpar o cache do Magento, execute:
-
-```
-rm -rf cache/* page_cache/* generation/*
-php bin/magento cache:flush
-php bin/magento cache:clean
-```
-
 ### Composer
 
 No terminal, vá até a pasta de seu Magento e execute:
@@ -42,17 +22,28 @@ No terminal, vá até a pasta de seu Magento e execute:
 composer require "asaplog/cotacao @dev"
 ```
 
-## Configuração
+## Pós instalação
 
-Após finalizar a instalação, vá até as configuração de frete de sua loja.
+Faça upgrade do Magento:
 
-Em português: Lojas > Configuração > Vendas > Métodos de Envio
+```
+php bin/magento setup:upgrade
+php bin/magento setup:di:compile
+```
 
-Em inglês: Stores > Configuration > Sales > Shipping Methods
+Limpe o cache do Magento:
 
-Nesta tela, você deve achar a opção ASAP Log e preencher o código de integração fornecido no painel do cliente.
+```
+rm -rf cache/* page_cache/* generation/*
+php bin/magento cache:flush
+php bin/magento cache:clean
+```
 
-Tudo pronto! Agora todas as cotação que houverem em sua loja serão calculados para a ASAP Log juntamente com qualquer outra transportadora que houver.
+Vá até as configuração de frete de sua loja (Lojas > Configuração > Vendas > Métodos de Envio).
+
+Nesta tela, você deve encontrar a opção ASAP Log e preencher o código de integração fornecido no painel do cliente.
+
+Tudo pronto! Todas as cotação serão calculados pela ASAP Log.
 
 ## Monitoramento
 
