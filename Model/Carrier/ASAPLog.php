@@ -27,6 +27,7 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
     protected $_chave;
     protected $_valor;
     protected $_cotacao;
+    protected $_log;
 
     public function __construct(StoreManagerInterface $storeManager, ScopeConfigInterface $scopeConfig, ErrorFactory $rateErrorFactory, LoggerInterface $logger, ResultFactory $rateResultFactory, MethodFactory $rateMethodFactory, array $data = [])
     {
@@ -44,19 +45,18 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
 
     public function collectRates(RateRequest $request)
     {
-//        $this->logMessage("Iniciando cotação");
-
         $result = $this->_rateResultFactory->create();
 
+        $this->_log = (bool)$this->getConfig('carriers/asaplog/log');
         $this->_chave = $this->getConfig('carriers/asaplog/chave');
         $this->_cep = $this->formatarCep($request->getDestPostcode());
         $this->_peso = $request->getPackageWeight();
         $this->_valor = $request->getBaseCurrency()->convert($request->getPackageValue(), $request->getPackageCurrency());
 
-//        $this->logMessage("Chave: " . $this->_chave);
-//        $this->logMessage("Destino: " . $this->_cep);
-//        $this->logMessage("Peso: " . $this->_peso);
-//        $this->logMessage("Valor: " . $this->_valor);
+        $this->logMessage("Chave: " . $this->_chave);
+        $this->logMessage("Destino: " . $this->_cep);
+        $this->logMessage("Peso: " . $this->_peso);
+        $this->logMessage("Valor: " . $this->_valor);
 
         if ($this->_chave == null || $this->_chave == '') {
             $this->logMessage("Chave não cadastrada");
@@ -91,7 +91,7 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
                 $result->append($method);
                 return $result;
             } else {
-                $this->logMessage("Resposta da cotação inválida");
+                $this->logMessage("Preço nulo ou igual a zero");
                 return false;
             }
         } else {
@@ -111,7 +111,7 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
             $ch = curl_init();
 
             $url = 'https://app.asaplog.com.br/webservices/v1/consultarFrete?peso=' . $this->_peso . '&valor=' . $this->_valor . '&cep=' . $this->_cep;
-//            $this->logMessage($url);
+            $this->logMessage($url);
 
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -139,7 +139,13 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
         try {
             $ch = curl_init();
 
-            curl_setopt($ch, CURLOPT_URL, 'https://app.asaplog.com.br/webservices/v1/informarCotacaoInvalida?plataforma=MAGENTO&nome=' . $this->_storeManager->getStore()->getName() . '&url=' . $this->_storeManager->getStore()->getBaseUrl());
+            $storeName = $this->_storeManager->getStore()->getName();
+            $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
+
+            $url = 'https://app.asaplog.com.br/webservices/v1/informarCotacaoInvalida?plataforma=MAGENTO&nome=' . $storeName . '&url=' . $baseUrl;
+            $this->logMessage($url);
+
+            curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_POST, 1);
 
@@ -164,9 +170,11 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
 
     public function logMessage($message)
     {
-        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/asaplog_cotacao.log');
-        $logger = new \Zend\Log\Logger();
-        $logger->addWriter($writer);
-        $logger->info($message);
+        if ($this->_log == 1) {
+            $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/asaplog_cotacao.log');
+            $logger = new \Zend\Log\Logger();
+            $logger->addWriter($writer);
+            $logger->info($message);
+        }
     }
 }

@@ -56,4 +56,4 @@ Tudo pronto! Agora todas as cotação que houverem em sua loja serão calculados
 
 ## Monitoramento
 
-Você pode consultar o arquivo ```var/log/asaplog_cotacao.log``` para verificar se houveram erros na integração.
+Você pode habilitar a opção **Registrar chamadas** na tela de configuração e consultar o arquivo ```var/log/asaplog_cotacao.log``` para verificar se houveram erros na integração.
