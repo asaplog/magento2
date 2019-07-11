@@ -61,7 +61,7 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
         if ($this->_chave == null || $this->_chave == '') {
             $this->logMessage("Chave não cadastrada");
 
-            informarCotacaoInvalida();
+            $this->informarCotacaoInvalida();
             return false;
         }
 
