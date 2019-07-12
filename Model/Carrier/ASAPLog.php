@@ -21,12 +21,6 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
     protected $_scopeConfig;
     protected $_rateResultFactory;
     protected $_rateMethodFactory;
-
-    protected $_cep;
-    protected $_peso;
-    protected $_chave;
-    protected $_valor;
-    protected $_cotacao;
     protected $_log;
 
     public function __construct(StoreManagerInterface $storeManager, ScopeConfigInterface $scopeConfig, ErrorFactory $rateErrorFactory, LoggerInterface $logger, ResultFactory $rateResultFactory, MethodFactory $rateMethodFactory, array $data = [])
@@ -48,27 +42,21 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
         $result = $this->_rateResultFactory->create();
 
         $this->_log = (bool)$this->getConfig('carriers/asaplog/log');
-        $this->_chave = $this->getConfig('carriers/asaplog/chave');
-        $this->_cep = $this->formatarCep($request->getDestPostcode());
-        $this->_peso = $request->getPackageWeight();
-        $this->_valor = $request->getBaseCurrency()->convert($request->getPackageValue(), $request->getPackageCurrency());
+        $chave = $this->getConfig('carriers/asaplog/chave');
+        $cep = $this->formatarCep($request->getDestPostcode());
+        $peso = $request->getPackageWeight();
+        $valor = $request->getBaseCurrency()->convert($request->getPackageValue(), $request->getPackageCurrency());
 
-        $this->logMessage("Chave: " . $this->_chave);
-        $this->logMessage("Destino: " . $this->_cep);
-        $this->logMessage("Peso: " . $this->_peso);
-        $this->logMessage("Valor: " . $this->_valor);
+        $this->logMessage("Chave: " . $chave);
+        $this->logMessage("Destino: " . $cep);
+        $this->logMessage("Peso: " . $peso);
+        $this->logMessage("Valor: " . $valor);
 
-        if ($this->_chave == null || $this->_chave == '') {
+        if ($chave == null || $chave == '') {
             $this->logMessage("Chave não cadastrada");
-
-            $this->informarCotacaoInvalida();
+            $this->informarCotacaoInvalida($this->_storeManager->getStore()->getName(), $this->_storeManager->getStore()->getBaseUrl());
             return false;
         }
-
-//        if ($request->getDestCountryId() != "BR") {
-//            $this->logMessage("País inválido");
-//            return false;
-//        }
 
         foreach ($request->getAllItems() as $item) {
             if ($item->getWeight() == null || $item->getWeight() == '' || $item->getWeight() <= 0) {
@@ -77,17 +65,16 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
             }
         }
 
-        $this->_cotacao = $this->fazerCotacao();
-        if ($this->_cotacao != null) {
-            if ($this->_cotacao['preco'] != null && $this->_cotacao['preco'] > 0) {
-
+        $cotacao = $this->fazerCotacao($peso, $valor, $cep, $chave);
+        if ($cotacao != null) {
+            if ($cotacao['preco'] != null && $cotacao['preco'] > 0) {
                 $method = $this->_rateMethodFactory->create();
                 $method->setCarrier($this->_code);
                 $method->setCarrierTitle($this->_name);
                 $method->setMethod($this->_code);
-                $method->setMethodTitle("Entrega em até " . $this->_cotacao['prazoMaximo'] . " dias úteis");
-                $method->setPrice($this->_cotacao['preco']);
-                $method->setCost($this->_cotacao['preco']);
+                $method->setMethodTitle("Entrega em até " . $cotacao['prazoMaximo'] . " dias úteis");
+                $method->setPrice($cotacao['preco']);
+                $method->setCost($cotacao['preco']);
                 $result->append($method);
                 return $result;
             } else {
@@ -105,12 +92,12 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
         return [$this->_code => $this->_name];
     }
 
-    public function fazerCotacao()
+    public function fazerCotacao($peso, $valor, $cep, $token)
     {
         try {
             $ch = curl_init();
 
-            $url = 'https://app.asaplog.com.br/webservices/v1/consultarFrete?peso=' . $this->_peso . '&valor=' . $this->_valor . '&cep=' . $this->_cep;
+            $url = 'https://app.asaplog.com.br/webservices/v1/consultarFrete?peso=' . $peso . '&valor=' . $valor . '&cep=' . $cep;
             $this->logMessage($url);
 
             curl_setopt($ch, CURLOPT_URL, $url);
@@ -118,7 +105,7 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
 
             $headers = array();
-            $headers[] = 'accessToken: ' . $this->_chave;
+            $headers[] = 'accessToken: ' . $token;
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
             $result = curl_exec($ch);
@@ -134,13 +121,10 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
         }
     }
 
-    public function informarCotacaoInvalida()
+    public function informarCotacaoInvalida($storeName, $baseUrl)
     {
         try {
             $ch = curl_init();
-
-            $storeName = $this->_storeManager->getStore()->getName();
-            $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
 
             $url = 'https://app.asaplog.com.br/webservices/v1/informarCotacaoInvalida?plataforma=MAGENTO&nome=' . $storeName . '&url=' . $baseUrl;
             $this->logMessage($url);

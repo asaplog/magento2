@@ -2,7 +2,7 @@
   "name": "asaplog/cotacao",
   "description": "Cotação de Frete da ASAP Log para Magento 2",
   "type": "magento2-module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": [
   ],
   "require": {
