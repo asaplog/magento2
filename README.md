@@ -2,27 +2,27 @@
 
 Com este módulo você poderá oferecer o frete de forma nativa em sua loja. Basta instalar e configurar sua chave de integração.
 
-**Importante:** Caso o CEP do destinatário não seja atendido, o peso total da cotação exceda 30kg ou o valor da cotação exceda o de sua negociação, a cotação não será feita.
+**Importante:** Recomendamos que seja feito backup dos arquivos e banco de dados de sua loja antes de proceder.
 
 ## Instalação
 
-### Baixando arquivo ZIP
+### Método 1 - Arquivo ZIP
 
-Baixe o módulo (https://github.com/asaplog/magento2/archive/master.zip) em seu servidor.
+Baixe o módulo (https://github.com/asaplog/magento2/archive/master.zip) no servidor.
 
 Na pasta do Magento, abra as pastas ```app/code/```. Crie então uma pasta chamada ```ASAPLog```, e dentro dela outra pasta chamada ```Cotacao```. A árvore de pastas ficará assim: ```app/code/ASAPLog/Magento/```.
 
 Extraia o arquivo ZIP dentro dessa pasta.
 
-### Composer
+### Método 2 - Composer
 
-No terminal, vá até a pasta de seu Magento e execute:
+No terminal, vá até a pasta do Magento e execute:
 
 ```
 composer require "asaplog/cotacao @dev"
 ```
 
-## Pós instalação
+## Configuração
 
 Faça upgrade do Magento:
 
@@ -39,12 +39,14 @@ php bin/magento cache:flush
 php bin/magento cache:clean
 ```
 
-Vá até as configuração de frete de sua loja (Lojas > Configuração > Vendas > Métodos de Envio).
+Vá até as configuração de frete do Magento em **Lojas > Configuração > Vendas > Métodos de Envio**.
 
-Nesta tela, você deve encontrar a opção ASAP Log e preencher o código de integração fornecido no painel do cliente.
+Nesta tela, você deve encontrar a opção ASAP Log, preencher o Código de Integração fornecido e salvar.
 
-Tudo pronto! Todas as cotação serão calculados pela ASAP Log.
+Tudo pronto! Agora você deve testar uma cotação para validar a instalação.
+
+Lembrando que o CEP do destinatário deve estar em nossa àrea de atendimento, o peso e o valor não devem exceder sua negociação e os produtos devem ter peso (Kg) cadastrado.
 
 ## Monitoramento
 
-Você pode habilitar a opção **Registrar chamadas** na tela de configuração e consultar o arquivo ```var/log/asaplog_cotacao.log``` para verificar se houveram erros na integração.
+Você pode habilitar a opção **Registrar chamadas** na tela de configuração e consultar o arquivo ```var/log/asaplog_cotacao.log``` na pasta do Magento para verificar se houveram erros.
