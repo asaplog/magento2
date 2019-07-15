@@ -1,5 +1,7 @@
 # Módulo ASAP Log para Magento 2.0 ou superior
 
+Abra sua conta gratuita com a gente e comece seus envios! Acesse https://painel.asaplog.com.br/abra-sua-conta.
+
 Com este módulo você poderá oferecer o frete de forma nativa em sua loja. Basta instalar e configurar sua chave de integração.
 
 **Importante:** Recomendamos que seja feito backup dos arquivos e banco de dados de sua loja antes de proceder.
