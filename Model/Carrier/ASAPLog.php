@@ -54,7 +54,7 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
 
         if ($chave == null || $chave == '') {
             $this->logMessage("Chave não cadastrada");
-            $this->informarCotacaoInvalida($this->_storeManager->getStore()->getName(), $this->_storeManager->getStore()->getBaseUrl());
+            $this->informarCotacaoInvalida();
             return false;
         }
 
@@ -121,12 +121,12 @@ class ASAPLog extends AbstractCarrier implements CarrierInterface
         }
     }
 
-    public function informarCotacaoInvalida($storeName, $baseUrl)
+    public function informarCotacaoInvalida()
     {
         try {
             $ch = curl_init();
 
-            $url = 'https://app.asaplog.com.br/webservices/v1/informarCotacaoInvalida?plataforma=MAGENTO&nome=' . $storeName . '&url=' . $baseUrl;
+            $url = 'https://app.asaplog.com.br/webservices/v1/informarCotacaoInvalida?plataforma=MAGENTO&nome=' . $this->_storeManager->getStore()->getName() . '&url=' . $this->_storeManager->getStore()->getBaseUrl();
             $this->logMessage($url);
 
             curl_setopt($ch, CURLOPT_URL, $url);
