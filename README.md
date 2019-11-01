@@ -12,7 +12,7 @@ Com este módulo você poderá oferecer o frete de forma nativa em sua loja. Bas
 
 Baixe o módulo (https://github.com/asaplog/magento2/archive/master.zip) no servidor.
 
-Na pasta do Magento, abra as pastas ```app/code/```. Crie então uma pasta chamada ```ASAPLog```, e dentro dela outra pasta chamada ```Cotacao```. A árvore de pastas ficará assim: ```app/code/ASAPLog/Magento/```.
+Na pasta do Magento, abra as pastas ```app/code/```. Crie então uma pasta chamada ```ASAPLog```, e dentro dela outra pasta chamada ```Cotacao```. A árvore de pastas ficará assim: ```app/code/ASAPLog/Cotacao/```.
 
 Extraia o arquivo ZIP dentro dessa pasta.
 
